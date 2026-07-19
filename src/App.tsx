@@ -7,7 +7,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   analyzeVideo,
   downloadVideo,
-  checkHealth,
   ApiClientError,
   VideoInfo,
   VideoFormat,
@@ -54,20 +53,6 @@ function platformIcon(p: string): string {
 }
 
 // ── sub-components ────────────────────────────────────────────────────────────
-
-function StatusBadge({ online }: { online: boolean | null }) {
-  if (online === null) return null;
-  return (
-    <div className={`flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border ${
-      online
-        ? "border-green-700 bg-green-900/40 text-green-400"
-        : "border-red-700 bg-red-900/40 text-red-400"
-    }`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${online ? "bg-green-400 animate-pulse" : "bg-red-400"}`} />
-      {online ? "API Online" : "API Offline"}
-    </div>
-  );
-}
 
 function Spinner({ size = 20 }: { size?: number }) {
   return (
@@ -121,14 +106,8 @@ export default function App() {
   const [selectedFormat, setSelectedFormat] = useState<VideoFormat | null>(null);
   const [dlProgress, setDlProgress] = useState(0);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [apiOnline, setApiOnline] = useState<boolean | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const downloadAnchorRef = useRef<HTMLAnchorElement>(null);
-
-  // ── health check on mount ─────────────────────────────────────────────────
-  useEffect(() => {
-    checkHealth().then(setApiOnline);
-  }, []);
 
   // ── auto-trigger browser download once blob is ready ──────────────────────
   useEffect(() => {
@@ -228,10 +207,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col font-sans">
-      {/* hidden download anchor */}
       <a ref={downloadAnchorRef} className="hidden" aria-hidden="true" />
 
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-20 bg-gray-900/90 backdrop-blur border-b border-gray-800 px-4 py-3">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -245,15 +222,11 @@ export default function App() {
               <p className="text-xs text-gray-500 leading-none">Facebook · Instagram · TikTok</p>
             </div>
           </div>
-          <StatusBadge online={apiOnline} />
         </div>
       </header>
 
-      {/* ── Main ───────────────────────────────────────────────────────────── */}
       <main className="flex-1 flex items-start justify-center px-4 py-10">
         <div className="w-full max-w-2xl space-y-6">
-
-          {/* ── INPUT CARD ─────────────────────────────────────────────────── */}
           <div className="bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl overflow-hidden">
             <div className="px-6 pt-6 pb-4 border-b border-gray-800">
               <h2 className="text-xl font-bold">Paste a Video Link</h2>
@@ -261,7 +234,6 @@ export default function App() {
             </div>
 
             <div className="p-6 space-y-4">
-              {/* URL input row */}
               <div className="relative">
                 <textarea
                   ref={textareaRef}
@@ -286,7 +258,6 @@ export default function App() {
                 )}
               </div>
 
-              {/* Error */}
               {error && (
                 <div className="flex items-start gap-2 bg-red-950/60 border border-red-800 text-red-300 text-sm rounded-xl px-4 py-3">
                   <svg className="h-4 w-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -296,7 +267,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* Action buttons */}
               <div className="flex gap-3">
                 <button
                   onClick={handlePaste}
@@ -329,18 +299,12 @@ export default function App() {
             </div>
           </div>
 
-          {/* ── RESULT CARD ────────────────────────────────────────────────── */}
+          {/* ── باقي الكود (نتائج، بروغريس، الخ) كما هو ────────────────────────────── */}
           {videoInfo && (phase === "result" || phase === "downloading" || phase === "done") && (
             <div className="bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl overflow-hidden animate-fadeIn">
-
-              {/* Thumbnail */}
               <div className="relative w-full aspect-video bg-gray-800">
                 {videoInfo.thumbnail ? (
-                  <img
-                    src={videoInfo.thumbnail}
-                    alt="Video thumbnail"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={videoInfo.thumbnail} alt="Video thumbnail" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-600">
                     <svg className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
@@ -348,18 +312,10 @@ export default function App() {
                     </svg>
                   </div>
                 )}
-
-                {/* Duration badge */}
-                <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-0.5 rounded-md font-mono">
-                  {videoInfo.duration}
-                </div>
-
-                {/* Platform badge */}
+                <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-0.5 rounded-md font-mono">{videoInfo.duration}</div>
                 <div className={`absolute top-2 left-2 w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg ${platformColor(videoInfo.platform)}`}>
                   {platformIcon(videoInfo.platform)}
                 </div>
-
-                {/* Done overlay */}
                 {phase === "done" && (
                   <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2">
                     <div className="bg-green-500 rounded-full p-3 shadow-xl">
@@ -373,8 +329,6 @@ export default function App() {
               </div>
 
               <div className="p-6 space-y-5">
-
-                {/* Title + uploader */}
                 <div>
                   <h3 className="font-bold text-lg leading-snug line-clamp-2">{videoInfo.title}</h3>
                   <p className="text-gray-400 text-sm mt-1">
@@ -384,20 +338,14 @@ export default function App() {
                     )}
                   </p>
                 </div>
-
-                {/* Stats row */}
                 <div className="grid grid-cols-3 gap-3">
                   <StatChip icon="👁️" label="Views" value={formatCount(videoInfo.view_count)} />
                   <StatChip icon="❤️" label="Likes" value={formatCount(videoInfo.like_count)} />
                   <StatChip icon="🎬" label="Platform" value={videoInfo.platform} />
                 </div>
-
-                {/* Quality selector */}
                 {videoInfo.formats && videoInfo.formats.length > 0 && (
                   <div>
-                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                      Quality
-                    </label>
+                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Quality</label>
                     <div className="flex flex-wrap gap-2">
                       {videoInfo.formats.map((fmt) => (
                         <button
@@ -411,60 +359,35 @@ export default function App() {
                           }`}
                         >
                           {fmt.label}
-                          {fmt.filesize && (
-                            <span className="ml-1.5 text-xs opacity-70">
-                              {formatBytes(fmt.filesize)}
-                            </span>
-                          )}
+                          {fmt.filesize && <span className="ml-1.5 text-xs opacity-70">{formatBytes(fmt.filesize)}</span>}
                         </button>
                       ))}
                     </div>
                   </div>
                 )}
-
-                {/* Download progress */}
                 {phase === "downloading" && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-300 font-medium flex items-center gap-2">
-                        <Spinner size={14} /> Downloading…
-                      </span>
+                      <span className="text-gray-300 font-medium flex items-center gap-2"><Spinner size={14} /> Downloading…</span>
                       <span className="text-indigo-400 font-semibold tabular-nums">{dlProgress}%</span>
                     </div>
                     <ProgressBar value={dlProgress} />
-                    <p className="text-xs text-gray-500 text-center">
-                      Processing on the server — this may take a moment.
-                    </p>
                   </div>
                 )}
-
-                {/* CTA row */}
                 <div className="flex gap-3 pt-1">
                   {phase !== "done" ? (
                     <button
                       onClick={handleDownload}
                       disabled={phase === "downloading"}
-                      className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-green-600 hover:bg-green-500 rounded-xl font-bold text-base transition disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] shadow-lg shadow-green-900/30"
+                      className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-green-600 hover:bg-green-500 rounded-xl font-bold text-base transition disabled:opacity-50 active:scale-[0.98] shadow-lg shadow-green-900/30"
                     >
-                      {phase === "downloading" ? (
-                        <><Spinner size={18} /> Downloading…</>
-                      ) : (
-                        <>
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                          </svg>
-                          Download MP4
-                        </>
-                      )}
+                      {phase === "downloading" ? <><Spinner size={18} /> Downloading…</> : <>Download MP4</>}
                     </button>
                   ) : (
                     <button
                       onClick={handleDownload}
                       className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-green-700 hover:bg-green-600 rounded-xl font-bold text-base transition active:scale-[0.98]"
                     >
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
                       Download Again
                     </button>
                   )}
@@ -472,84 +395,17 @@ export default function App() {
                     onClick={handleReset}
                     disabled={phase === "downloading"}
                     className="px-4 py-3.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl font-semibold text-sm transition disabled:opacity-40"
-                    title="Start over"
                   >
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582M20 20v-5h-.582M4.582 9A8 8 0 0119.418 15M19.418 15A8 8 0 014.582 9" />
                     </svg>
                   </button>
                 </div>
-
               </div>
             </div>
           )}
-
-          {/* ── PLATFORM CHIPS ─────────────────────────────────────────────── */}
-          {phase === "input" && (
-            <div className="grid grid-cols-3 gap-4 text-center">
-              {[
-                { name: "Facebook", icon: "f", color: "bg-blue-600", desc: "Videos & Reels" },
-                { name: "Instagram", icon: "𝒊", color: "bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500", desc: "Reels & Posts" },
-                { name: "TikTok", icon: "♪", color: "bg-gray-900 border border-gray-600", desc: "Short Videos" },
-              ].map(({ name, icon, color, desc }) => (
-                <div key={name} className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-gray-600 transition">
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md ${color}`}>
-                    {icon}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">{name}</p>
-                    <p className="text-gray-500 text-xs">{desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* ── HOW IT WORKS ───────────────────────────────────────────────── */}
-          {phase === "input" && (
-            <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-5">
-              <h3 className="font-semibold text-sm text-gray-300 mb-4 uppercase tracking-wider">How it works</h3>
-              <div className="space-y-3">
-                {[
-                  { step: "1", title: "Copy a link", desc: "Tap Share on any Facebook, Instagram, or TikTok video and copy the link." },
-                  { step: "2", title: "Paste & Analyze", desc: "Paste the URL above and hit Analyze. We extract the best available quality." },
-                  { step: "3", title: "Download MP4", desc: "Choose your quality and tap Download. The file saves directly to your device." },
-                ].map(({ step, title, desc }) => (
-                  <div key={step} className="flex gap-4 items-start">
-                    <div className="w-7 h-7 rounded-full bg-indigo-600/30 border border-indigo-700 flex items-center justify-center text-indigo-400 font-bold text-xs shrink-0 mt-0.5">
-                      {step}
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm text-gray-200">{title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
         </div>
       </main>
-
-      {/* ── Ad Placeholder ─────────────────────────────────────────────────── */}
-      <div className="bg-gray-900 border-t border-gray-800 py-3 px-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-gradient-to-r from-indigo-950 via-purple-950 to-indigo-950 border border-indigo-900/50 rounded-xl h-16 flex items-center justify-center gap-2 text-gray-500 text-xs">
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5M15.5 3.5a2.121 2.121 0 013 3L11 14l-4 1 1-4 6.5-6.5z" />
-            </svg>
-            Advertisement · AdMob Banner Placeholder
-          </div>
-        </div>
-      </div>
-
-      {/* ── Footer ─────────────────────────────────────────────────────────── */}
-      <footer className="bg-gray-950 border-t border-gray-900 py-4 px-4 text-center text-xs text-gray-600">
-        <p>
-          Social Video Downloader · For personal use only · Respect copyright and platform ToS
-        </p>
-      </footer>
     </div>
   );
 }
