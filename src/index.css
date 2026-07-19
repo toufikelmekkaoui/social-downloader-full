@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* ── Custom animations ─────────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.35s ease-out both;
+}
+
+/* ── Smooth scrollbar ──────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Textarea no resize handle on mobile ───────────────────────────────────── */
+textarea {
+  resize: none;
+}
