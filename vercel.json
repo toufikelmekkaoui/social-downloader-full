@@ -1,12 +1,22 @@
 {
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "functions": {
+    "backend/api/index.py": {
+      "runtime": "python3.12",
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.py"
+      "destination": "/backend/api/index.py"
     },
     {
-      "source": "/(.*)",
-      "destination": "/$1"
+      "source": "/((?!api).*)",
+      "destination": "/index.html"
     }
   ]
 }
