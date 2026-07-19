@@ -2,9 +2,9 @@
 
 const getBaseURL = (): string => {
   if (import.meta.env.PROD) {
-    return ""; // في الـ Production كيقرا من نفس الدومين تلقائياً
+    return ""; 
   }
-  return import.meta.env.VITE_API_URL || "http://localhost:5000"; // في الـ Dev
+  return import.meta.env.VITE_API_URL || "http://localhost:5000"; 
 };
 
 const BASE_URL = getBaseURL();
@@ -50,6 +50,11 @@ async function apiRequest<T>(
     throw error;
   }
 }
+
+// هادي هي الدالة اللي ناقصة وكتسبب المشكل
+export const analyzeVideo = (url: string) => {
+  return api.post<{ url: string; title: string; thumbnail: string }>("/analyze", { url });
+};
 
 export const api = {
   get: <T>(endpoint: string, options?: RequestOptions) =>
