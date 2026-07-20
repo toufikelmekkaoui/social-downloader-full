@@ -122,8 +122,14 @@ export default function App() {
   const [selectedFormat, setSelectedFormat] = useState<VideoFormat | null>(null);
   const [dlProgress, setDlProgress] = useState(0);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState(() => localStorage.getItem("svd-theme") !== "light");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const downloadAnchorRef = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    localStorage.setItem("svd-theme", isDark ? "dark" : "light");
+    document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  }, [isDark]);
 
   // ── auto-trigger browser download once blob is ready ──────────────────────
   useEffect(() => {
@@ -228,7 +234,7 @@ export default function App() {
   // ── render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col font-sans">
+    <div className={`app-shell min-h-screen text-gray-100 flex flex-col font-sans ${isDark ? "is-dark" : "is-light"}`}>
       <a ref={downloadAnchorRef} className="hidden" aria-hidden="true" />
 
       <header className="sticky top-0 z-20 bg-gray-900/90 backdrop-blur border-b border-gray-800 px-4 py-3">
@@ -254,10 +260,19 @@ export default function App() {
                 Social Video Downloader
               </h1>
               <p className="text-xs text-gray-500 leading-none">
-                Facebook · Instagram · TikTok
+                Download what matters, beautifully.
               </p>
             </div>
           </div>
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={() => setIsDark((value) => !value)}
+            aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
+          >
+            <span aria-hidden="true">{isDark ? "☼" : "☾"}</span>
+            <span className="theme-label">{isDark ? "Light" : "Dark"}</span>
+          </button>
         </div>
       </header>
 
